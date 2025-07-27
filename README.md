@@ -56,14 +56,15 @@ func main() {
 ## Current Limitations
 
 This implementation is in early development and currently supports:
-- ✅ Reading SQLite database files
-- ✅ Parsing database headers and metadata
-- ✅ B-tree leaf page processing
-- ✅ Basic record extraction
-- ❌ SQL query parsing (not implemented)
-- ❌ Writing/modifying databases (read-only)
-- ❌ Index operations
-- ❌ Transaction support
+- Reading SQLite database files
+- Parsing database headers and metadata
+- B-tree leaf page processing
+- Basic record extraction
+What it doesn't support:
+- SQL query parsing (not implemented)
+- Writing/modifying databases (read-only)
+- Index operations
+- Transaction support
 
 ## Building and Running
 
