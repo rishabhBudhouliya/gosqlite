@@ -39,7 +39,7 @@ func (p *Pager) Open(filename string) error {
 	return nil
 }
 
-func (p *Pager) GetPage(pageNum int, pageSize int) ([]byte, error) {
+func (p *Pager) GetPage(pageNum uint32, pageSize int) ([]byte, error) {
 	// page number will start from 1 to N (sequential)
 	// from page 1, will will get the database header and sqlite_schema table stored a btree leaf node
 
