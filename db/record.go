@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
-	"reflect"
 )
 
 type Record []interface{}
@@ -66,14 +65,6 @@ func CreateRecord(payload []byte) Record {
 				record = append(record, data)
 				body = body[n:]
 			}
-		}
-	}
-	for _, v := range record {
-		t := reflect.TypeOf(v)
-		if t.Kind() == reflect.Int64 {
-			fmt.Println(v)
-		} else {
-			fmt.Println(string(v.([]byte)))
 		}
 	}
 	return record
