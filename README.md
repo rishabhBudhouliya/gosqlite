@@ -74,7 +74,7 @@ git clone https://github.com/rishabhBudhouliya/gosqlite.git
 cd gosqlite
 
 # Run the main program
-go run main_db.go
+go run main.go sample.db
 
 # Run tests
 go test ./db/
