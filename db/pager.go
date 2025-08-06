@@ -1,10 +1,11 @@
 package db
 
 import (
+	"fmt"
+	"io"
 	"os"
-	"sync"
 
-	"golang.org/x/exp/mmap"
+	"golang.org/x/sys/unix"
 )
 
 const (
@@ -17,11 +18,8 @@ type Pager struct {
 	// a file based lock?
 	// ErrCode uint8
 	// TODO: file handle
-	f          *os.File
-	mm         *mmap.ReaderAt
-	bufferPool sync.Pool
-	// TODO: page cache - we rely on mmap for caching pages
-	// Cache map[int][]byte
+	f    *os.File
+	data []byte
 }
 
 func (p *Pager) Open(filename string) error {
@@ -30,40 +28,40 @@ func (p *Pager) Open(filename string) error {
 	if err != nil {
 		return err
 	}
-	mm, err := mmap.Open(filename)
-	if err == nil {
-		p.f = f
-		p.mm = mm
-	} else {
+	stat, err := f.Stat()
+	if err != nil {
 		f.Close()
 		return err
 	}
-	p.bufferPool = sync.Pool{
-		New: func() any {
-			return make([]byte, pageSize)
-		},
+	fileSize := stat.Size()
+
+	data, err := unix.Mmap(int(f.Fd()), 0, int(fileSize), unix.PROT_READ, unix.MAP_SHARED)
+	if err != nil {
+		f.Close()
+		return err
 	}
+	if err := unix.Madvise(data, unix.MADV_SEQUENTIAL); err != nil {
+		fmt.Printf("Madvise warning: %v", err)
+	}
+	p.f = f
+	p.data = data
 	return nil
 }
 
 func (p *Pager) GetPage(pageNum uint32, pageSize int) ([]byte, error) {
-	// page number will start from 1 to N (sequential)
-	// from page 1, will will get the database header and sqlite_schema table stored a btree leaf node
-	buff := p.bufferPool.Get().([]byte)
-	// make page index 1-indexed
-	pageOffset := (int64(pageNum-1) * int64(pageSize))
-	// determine the size of byte[] to be loaded in memory
-	// determine the offset
-	_, err := p.mm.ReadAt(buff, pageOffset)
-	if err != nil {
-		p.bufferPool.Put(buff)
-		return nil, err
+	start := int64(pageNum-1) * int64(pageSize)
+	end := start + int64(pageSize)
+	if start < 0 || end > int64(len(p.data)) {
+		return nil, io.EOF
 	}
-	return buff, err
+	pageSlice := p.data[start:end]
+	return pageSlice, nil
 }
 
-func (p *Pager) PutPage(buff []byte) {
-	if cap(buff) == pageSize {
-		p.bufferPool.Put(buff)
+func (p *Pager) Close() error {
+	if err := unix.Munmap(p.data); err != nil {
+		p.f.Close()
+		return err
 	}
+	return p.f.Close()
 }
