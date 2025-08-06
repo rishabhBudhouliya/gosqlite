@@ -8,7 +8,7 @@ import (
 
 type Record []interface{}
 
-func CreateRecord(payload []byte) Record {
+func HydrateRecord(payload []byte) Record {
 	var record Record
 	if len(payload) == 0 {
 		fmt.Print("Header can't be empty!!")

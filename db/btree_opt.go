@@ -89,7 +89,7 @@ func (p *LeafPage) GetRecord(i int) Record {
 	payloadSize, startRowid := ProcessVarint(cell)
 	_, startPayload := ProcessVarint(cell[startRowid:])
 	payload := cell[startRowid+startPayload : (int64(startRowid+startPayload) + payloadSize)]
-	return CreateRecord(payload)
+	return HydrateRecord(payload)
 }
 
 func rSearch(pager *Pager, p Page, rowID int64) Record {
