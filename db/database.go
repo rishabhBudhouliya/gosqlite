@@ -29,33 +29,10 @@ func NewDatabase(fileName string) *Database {
 	}
 }
 
-// func Search(rootPageID uint32, pager Pager, rowID int64) Record {
-// 	pageContent, _ := pager.GetPage(rootPageID, pageSize)
-// 	var bh *BtreeHeader
-// 	btHeader := pageContent
-// 	if rootPageID == 1 {
-// 		bh, _ = ParseBtreeHeader(btHeader[100:112])
-// 		if bh.Type == 0x0d {
-// 			btHeader = btHeader[108:]
-// 		} else {
-// 			btHeader = btHeader[112:]
-// 		}
-// 	} else {
-// 		bh, _ = ParseBtreeHeader(pageContent[:12])
-// 		if bh.Type == 0x0d {
-// 			btHeader = btHeader[8:]
-// 		} else {
-// 			btHeader = btHeader[12:]
-// 		}
-// 	}
-// 	page := NewPage(bh, btHeader[:(2*bh.Cells)], pageContent)
-// 	return rSearch(pager, page, rowID)
-// }
-
 func Search(rootPageID uint32, pager *Pager, rowID int64) Record {
 	currentPagerID := rootPageID
 	for {
-		p, pageContent := fetchAndParsePage(pager, currentPagerID, pageSize)
+		p := fetchAndParsePage(pager, currentPagerID, pageSize)
 		var record Record
 		found := false
 		switch page := p.(type) {
@@ -84,14 +61,13 @@ func Search(rootPageID uint32, pager *Pager, rowID int64) Record {
 				}
 			}
 		}
-		pager.PutPage(pageContent)
 		if found {
 			return record
 		}
 	}
 }
 
-func fetchAndParsePage(pager *Pager, pageID uint32, pageSize int) (Page, []byte) {
+func fetchAndParsePage(pager *Pager, pageID uint32, pageSize int) Page {
 	pageContent, _ := pager.GetPage(pageID, pageSize)
 	var bh *BtreeHeader
 	btHeader := pageContent
@@ -110,7 +86,7 @@ func fetchAndParsePage(pager *Pager, pageID uint32, pageSize int) (Page, []byte)
 			btHeader = btHeader[12:]
 		}
 	}
-	return NewPage(bh, btHeader[:(2*bh.Cells)], pageContent), pageContent
+	return NewPage(bh, btHeader[:(2*bh.Cells)], pageContent)
 }
 
 type SqliteSchema struct {
