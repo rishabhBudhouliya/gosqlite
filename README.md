@@ -233,6 +233,26 @@ Here, we see the benefit of using the unix sys call. We get to slice the data di
 
 # Result
 
-[insert SVG]
-And
-[diagram with performance difference]![](images/Screenshot%202025-09-15%20at%201.26.25%E2%80%AFPM.png)
+Finally, the section that should have been at the very beginning: results.
+
+After all the profiling, investigating, and refactoring, the optimizations paid off spectacularly. Remember how SQLite was **8 times faster** than my database? Let's see what happened:
+
+**Wall Clock Execution Time (1 million sequential reads):**
+- My database (before): **14.453 seconds**
+- SQLite: **1.779 seconds**
+- My database (after): **1.200 seconds**
+
+![Wall Clock Execution Time Comparison](images/Screenshot%202025-09-15%20at%201.26.25%E2%80%AFPM.png)
+
+Not only did I close the gap, but my database now outperforms SQLite by **~32%** on this specific benchmark. The journey from 8x slower to 32% faster involved:
+
+1. **Zero-copy deserialization**: Eliminated unnecessary heap allocations by keeping page contents in raw byte form and deserializing on-demand
+2. **Direct mmap syscalls**: Replaced Go's experimental mmap package with direct unix syscalls, avoiding intermediate buffer copies
+3. **Reduced GC pressure**: Cumulative heap allocations dropped from 68GB+ to near-zero for the same workload
+
+Here's the CPU profile comparison showing the dramatic reduction in garbage collection overhead:
+![CPU Profile Diff](final-prof-results/diff_graph.svg)
+
+The moral of the story? Go can be used for performance-critical storage engines, but you must fight against the language's conveniences. Memory-managed languages demand zero-copy architectures and careful attention to allocation patterns. Every slice allocation, every intermediate buffer, every convenience wrapper—they all add up.
+
+[Richard Hipp] 1 [Rishabh] 1 **(We'll call it even)**
