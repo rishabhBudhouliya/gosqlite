@@ -252,7 +252,7 @@ Not only did I close the gap, but my database now outperforms SQLite by **~32%**
 3. **Reduced GC pressure**: Cumulative heap allocations dropped from 68GB+ to near-zero for the same workload
 
 Here's the CPU profile comparison showing the dramatic reduction in garbage collection overhead:
-![CPU Profile Diff](images/diff_graph.svg)
+![CPU Profile Diff](images/diff_graph.png)
 
 The moral of the story? Go can be used for performance-critical storage engines, but you must fight against the language's conveniences. Memory-managed languages demand zero-copy architectures and careful attention to allocation patterns. Every slice allocation, every intermediate buffer, every convenience wrapper—they all add up.
 
