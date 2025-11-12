@@ -6,11 +6,13 @@ The beautiful thing about trying to write a performant system with inherent cons
 
 Okay,
 A storage engine in Go? Surely, you've never written a single line of code in a highly performant database.
+
 **Answer**
 Yes, I have never written a database by myself and I was always interested in database internals. To me, it was a good force function to learn how they work, and particularly the storage engine layer as it manages all the interaction between the database, kernel and the file system.
 The choice of Go was purely a choice of convenience. In retrospect, it was the right choice for me as it taught me that it was a bad idea to use a memory managed language to design a storage engine with
 
 Wait, why SQLite?
+
 **Answer**
 I chose SQLite as a reference because it is a fairly easy database to peek into. It's also a highly optimized OLTP database and I was sure a lot about performance can be inferred from it.
 
@@ -18,7 +20,6 @@ I started to write the storage engine like I would write a web app (yes, I'm an 
 
 ### What is a storage engine (skip it if you're a database engineer)
 ![](images/Screenshot%202025-09-19%20at%2012.57.14%E2%80%AFPM.png)
-===[reference to Database Internals by author-name]===
 
 The storage engine takes care
 
@@ -251,7 +252,7 @@ Not only did I close the gap, but my database now outperforms SQLite by **~32%**
 3. **Reduced GC pressure**: Cumulative heap allocations dropped from 68GB+ to near-zero for the same workload
 
 Here's the CPU profile comparison showing the dramatic reduction in garbage collection overhead:
-![CPU Profile Diff](final-prof-results/diff_graph.svg)
+![CPU Profile Diff](images/diff_graph.svg)
 
 The moral of the story? Go can be used for performance-critical storage engines, but you must fight against the language's conveniences. Memory-managed languages demand zero-copy architectures and careful attention to allocation patterns. Every slice allocation, every intermediate buffer, every convenience wrapper—they all add up.
 
